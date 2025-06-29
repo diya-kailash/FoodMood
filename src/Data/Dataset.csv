@@ -1,0 +1,136 @@
+﻿Food Item,Food Type,Cuisine,Taste Notes,Texture,Prep Time,Budget,Social Context,User Mood
+Idli,Light Meal,South Indian,Mild Savoury,"Soft, Steamed",Moderate,Cheap,"Family, Alone","Usual meal, Comfort eating,"
+Dosa,Meal,South Indian,Mild Savoury,"Crispy, Roasted",Quick,Cheap,"Family, Alone",Usual meal
+Medu Vada,Snack,South Indian,Mild Savoury,"Crispy, Fried",Moderate,Cheap,"Family, Alone",Cravings
+Uttapam,Light Meal,South Indian,Mild Savoury,"Soft & Crispy, Roasted",Moderate,Cheap–Moderate,"Family, Alone",Usual meal
+Appam,Meal,South Indian,Mild Savoury,Soft & Crispy,Moderate,Moderate,"Family, Alone","Cravings, Celebration"
+Pongal,Light Meal,South Indian,Mild Savoury,Soft & Mushy,Moderate,Cheap,"Family, Alone",Usual meal
+Poori Masala,Meal,South Indian,Mild Savoury,"Soft & Crispy, Fried",Moderate,Cheap–Moderate,"Family, Alone",Cravings
+Parotta Kurma,Meal,South Indian,Mild Savoury,"Soft & Crispy, Fried / Roasted",Elaborate,Moderate,"Family, Alone",Cravings
+Upma,Light Meal,South Indian,Mild Savoury,Soft & Mushy,Quick,Cheap,"Family, Alone",Usual meal
+Rava Idli,Light Meal,South Indian,Mild Savoury,"Soft, Steamed",Moderate,Cheap,"Family, Alone",Usual meal
+Masala Vada,Snack,South Indian,Mild Savoury,"Crispy, Fried",Moderate,Cheap,"Family, Alone",Cravings
+Bonda,Snack,South Indian,Mild Savoury,"Crispy, Fried",Moderate,Cheap,"Family, Alone",Cravings
+Poha,Light Meal,Maharashtrian,"Mild Savoury, Tangy",Soft & Crunchy,Quick,Cheap,"Family, Alone",Usual meal
+Pav Bhaji,Light Meal,Maharashtrian,Tangy & Spicy,Soft,Moderate,Cheap–Moderate,"Family, Alone, Group/Party, Street Food","Cravings, Comfort eating"
+Misal Pav,Snack,Maharashtrian,Tangy & Spicy,Soft,Moderate,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Dabeli,Snack,Maharashtrian,Sweet & Spicy,Soft & Crunchy,Moderate,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Vada Pav,Snack,Maharashtrian,Spicy Savoury,Soft & Crunchy,Quick,Cheap,"Family, Alone, Group/Party, Street Food","Cravings, Comfort eating"
+Kathi Roll,Meal,North Indian ,Spicy Savoury,Soft & Crispy,Moderate,Moderate,"Family, Alone, Group/Party, Street Food",Cravings
+Bhel Puri,Snack,Maharashtrian,"Tangy, Sweet & Spicy",Crunchy,Quick,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Pani Puri,Snack,Pan-Indian,Tangy & Spicy,Crunchy,Quick,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Dahi Papdi Chaat,Snack,North Indian,"Tangy, Sweet & Spicy",Crunchy,Quick,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Aloo Tikki Chaat,Snack,North Indian,"Tangy, Sweet & Spicy",Crunchy,Moderate,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Ragda Pattice,Snack,Maharashtrian,"Tangy, Sweet & Spicy",Crunchy,Moderate,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Masala Papad,Snack,North Indian,Tangy & Spicy,Crunchy,Quick,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Samosa,Snack,North Indian,Mild Savoury,"Crispy, Fried",Moderate,Cheap,"Family, Alone, Group/Party, Street Food",Usual Snack
+Puff/Patty,Snack,North Indian,Mild Savoury,"Crispy, Fried / Baked",Moderate,Cheap,"Family, Alone, Group/Party, Street Food",Usual Snack
+Bread Pakora,Snack,North Indian,Mild Savoury,"Crispy, Fried",Quick,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Mirchi Vada,Snack,Maharashtrian,Spicy Savoury,"Crispy, Fried",Quick,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Kachori,Snack,Rajasthani (North Indian),Mild Savoury,"Crispy, Fried",Moderate,Cheap,"Family, Alone, Group/Party, Street Food",Cravings
+Khaman / Dhokla,Snack,Gujarati,Sweet & Savoury,"Soft, Steamed",Moderate,Cheap,"Family, Group/Party",Usual Snack
+Khandvi,Snack,Gujarati,Mild Savoury,"Soft, Steamed",Moderate,Cheap,"Family, Group/Party",Usual Snack
+Jalebi,Dessert,Gujarati,Sweet,"Crispy, Fried",Elaborate,Cheap–Moderate,"Family, Group/Party","Cravings, Celebration"
+Fafda,Snack,Gujarati,Mild Savoury,"Crispy, Fried",Moderate,Cheap,"Family, Group/Party","Cravings, Celebration"
+Thepla,Light Meal,Gujarati,Mild Savoury,Soft,Moderate,Cheap,"Family, Alone","Usual meal, Comfort eating"
+Pakore ,Snack,North Indian,Spicy Savoury,"Crispy, Fried",Quick,Cheap,"Family, Group/Party","Cravings, Celebration"
+Sabudana Vada,Snack,Maharashtrian,Mild Savoury,"Crispy, Fried",Moderate,Cheap,"Family, Alone",Cravings
+Sabudana Khichdi,Light Meal,Maharashtrian,Mild Savoury,Soft & Mushy,Moderate,Moderate,"Family, Alone","Usual meal, Healthy"
+Chole Bhature,Meal,Punjabi (North Indian),Tangy & Spicy,"Soft & Crispy, Fried",Elaborate,Moderate,"Family, Alone, Group/Party, Street Food","Cravings, Celebration"
+Amritsari Kulche,Meal,Punjabi (North Indian),Tangy & Spicy,Soft & Crispy,Moderate,Moderate,"Family, Alone, Group/Party, Street Food","Cravings, Celebration"
+Aloo/Paneer Paratha,Meal,Punjabi (North Indian),Mild Savoury,"Soft & Crispy, Fried/Roasted",Moderate,Moderate,"Family, Alone","Usual meal, Comfort eating"
+Soya Chaap,Snack,Punjabi (North Indian),Mild Savoury,"Soft, Roasted",Moderate,Moderate,"Family, Alone, Group/Party, Street Food","Usual Snack, Protein Rich"
+Paneer Tikka,Snack,Punjabi (North Indian),Mild Savoury,"Soft, Roasted",Moderate,Moderate,"Family, Group/Party","Usual Snack, Protein Rich"
+Thukpa,Meal,Indo‑Chinese,"Umami, Mild Spicy",Soft,Moderate,Moderate,"Family, Alone",Craving
+Momos,Snack,Indo‑Chinese,"Umami, Spicy ","Soft/Crispy, Steamed/Fried",Moderate,Cheap,"Family, Alone, Group/Party, Street Food","Cravings, Comfort eating"
+Maggi,Snack,Pan-Indian,Mild Savoury,Soft,Quick,Cheap,"Family, Alone","Cravings, Comfort eating"
+Salad,Snack,Global,Refreshing,Crunchy,Quick,Moderate,"Family, Alone, Date","Usual, Healthy, Refreshing"
+Fried Rice,Meal,Chinese,"Umami, Mild Spicy",Soft,Moderate,Moderate,"Family, Group/Party",Usual meal
+Manchurian,Snack,Indo‑Chinese,"Umami, Spicy ","Soft & Crispy, Fried",Moderate,Moderate,"Family, Group/Party","Cravings, Celebration"
+Spring Rolls,Snack,Chinese,"Umami, Spicy ","Crispy, Fried",Elaborate,Moderate,"Family, Group/Party","Cravings, Celebration"
+Hakka Noodles,Meal,Indo‑Chinese,"Umami, Spicy ",Soft,Moderate,Cheap–Moderate,"Family, Alone, Group/Party, Street Food","Cravings, Comfort eating"
+Honey Chilli Potato,Snack,Indo‑Chinese,"Umami, Sweet & Spicy","Soft & Crispy, Fried",Moderate,Moderate,"Family, Group/Party","Cravings, Celebration"
+Pizza,Meal,Italian,"Mild Spicy, Cheesy","Crunchy, Baked",Elaborate,Expensive,"Family, Group/Party, Date","Cravings, Celebration"
+Arrabbiata Pasta,Meal,Italian,Spicy Savoury,Soft,Moderate,Moderate-Expensive,"Family, Group/Party, Date","Usual meal, Comfort eating"
+Alfredo Pasta,Meal,Italian,"Mild Savoury, Cheesy",Soft,Moderate,Moderate-Expensive,"Family, Group/Party, Date","Usual meal, Comfort eating"
+Garlic Bread,Snack,Italian,Mild Savoury,"Crunchy, Baked",Quick,Moderate,"Group/Party, Date","Cravings, Celebration"
+Lasagna,Meal,Italian,"Mild Savoury, Cheesy","Soft, Baked",Elaborate,Expensive,"Group/Party, Date","Cravings, Celebration"
+Wrap,Light Meal,Global,Mild Savoury,Soft ,Quick,Moderate,"Family, Alone, Date",Usual meal
+Bruschetta,Snack,Italian,"Tangy, Mild Savoury","Crunchy, Baked",Quick,Moderate,"Group/Party, Date","Cravings, Celebration"
+Sandwich,Snack,Global,Mild Savoury,Soft & Crispy,Quick,Cheap,"Family, Alone, Group/Party, Date",Usual snack
+Burger,Meal,American,Mild Savoury/Spicy,Soft & Crispy,Moderate,Moderate,"Family, Alone, Group/Party, Date",Craving
+French Fries,Snack,American,Mild Savoury,"Crispy, Fried",Quick,Cheap,"Family, Alone, Group/Party, Date",Craving
+Nachos,Snack,Mexican,Mild Savoury,Crunchy,Quick,Moderate,"Family, Group/Party, Date",Craving
+Tacos,Meal,Mexican,"Mild Savoury, Tangy & Spicy",Soft/Crunchy,Moderate,Moderate,"Alone, Group/Party, Date",Craving
+Burrito,Meal,Mexican,"Mild Savoury, Tangy & Spicy",Soft,Moderate,Moderate,"Alone, Group/Party, Date",Usual meal
+Falafel,Snack,Mediterranean,Mild Savoury,"Crispy, Fried",Moderate,Moderate,"Alone, Group/Party, Date","Cravings, Celebration"
+Shawarma,Meal,Mediterranean,Spicy Savoury,Soft,Moderate,Moderate,"Family, Alone, Group/Party","Cravings, Celebration"
+Hummus & Pita,Snack,Mediterranean,Mild Savoury,Soft,Quick,Moderate,"Alone, Group/Party, Date","Cravings, Celebration"
+Rajma Chawal,Meal,North Indian,Tangy & Spicy,Soft (Rice),Moderate,Moderate,"Family, Alone","Usual meal, Comfort eating"
+Kadhi Chawal,Meal,North Indian,Tangy & Sweet & Mildly Spicy,Soft (Rice),Moderate,Moderate,"Family, Alone","Usual meal, Comfort eating"
+Sambar Rice,Meal,South Indian,Tangy & Mildly Spicy,Soft (Rice),Moderate,Cheap–Moderate,"Family, Alone",Usual meal
+Rasam Rice,Meal,South Indian,Tangy & Spicy,Soft (Rice),Moderate,Cheap–Moderate,"Family, Alone","Usual meal, Comfort eating"
+Bisi Bele Bath,Meal,South Indian ,Tangy & Spicy,Soft & Mushy,Moderate,Cheap–Moderate,"Family, Alone",Usual meal
+Curd Rice,Meal,South Indian,Refreshing,Soft & Mushy,Quick,Cheap,"Family, Alone","Usual meal, Comfort eating"
+Lemon Rice,Meal,South Indian,Tangy & Mildly Spicy,Soft (Rice),Quick,Cheap,"Family, Alone",Usual meal
+Tamarind Rice,Meal,South Indian,Tangy & Mildly Spicy,Soft (Rice),Quick,Cheap,"Family, Alone",Usual meal
+Biryani,Meal,Pan-Indian,Spicy Savoury,Soft (Rice),Elaborate,Moderate‑Expensive,"Family, Alone, Group/Party","Cravings, Celebration"
+Tawa Pulav,Meal,Maharashtrian,Spicy Savoury,Soft (Rice),Moderate,Moderate,"Family, Alone, Group/Party, Street Food","Cravings, Celebration"
+Jeera Rice,Meal,North Indian,Mild Savoury,Soft (Rice),Quick,Cheap–Moderate,"Family, Alone",Usual meal
+Dal Khichdi,Meal,North Indian,Mild Savoury,Soft & Mushy,Moderate,Cheap–Moderate,"Family, Alone","Usual meal, Comfort eating"
+Dal Baati,Meal,Rajasthani (North Indian),Mild Savoury,"Soft & Crispy, Roasted",Elaborate,Moderate,Family,"Cravings, Celebration"
+Makki Roti with Sarson Saag,Meal,Punjabi (North Indian),"Bitter, Mild Savoury","Soft & Crispy, Roasted",Elaborate,Moderate,Family,"Cravings, Celebration"
+Dal Tadka with Side,Meal,North Indian,Mild Savoury,Soft & Creamy,Moderate,Cheap–Moderate,"Family, Alone","Usual meal, Comfort eating"
+Dal Makhni with Side,Meal,Punjabi (North Indian),Mildly Sweet & Savoury,Soft & Creamy,Moderate,Moderate,"Family, Alone, Group/Party, Date","Usual meal, Cravings, Comfort eating"
+Malai Kofta with Side,Meal,North Indian,Mildly Sweet & Savoury,Soft & Creamy,Moderate,Moderate,"Family, Alone, Group/Party, Date","Cravings, Celebration"
+Palak Paneer with Side,Meal,North Indian,Mild Savoury,Soft & Creamy,Moderate,Moderate,"Family, Alone, Group/Party, Date",Usual meal
+Paneer Butter Masala with Side,Meal,North Indian,Mildly Sweet & Savoury,Soft & Creamy,Moderate,Moderate,"Family, Alone, Group/Party, Date",Usual meal
+Bhindi Fry with Side,Meal,North Indian,Mild Savoury,Soft & Crunchy,Quick,Cheap–Moderate,"Family, Alone",Usual meal
+Chana Masala with Side,Meal,North Indian,Tangy & Mildly Spicy,Soft,Moderate,Moderate,"Family, Alone",Usual meal
+Aloo Gobi with Side,Meal,North Indian,Mild Savoury,Soft & Crunchy,Moderate,Cheap–Moderate,"Family, Alone",Usual meal
+Baingan Bharta with Side,Meal,North Indian,Tangy & Mildly Spicy,Soft & Crunchy,Moderate,Moderate,"Family, Alone",Usual meal
+Sev Tameta with Side,Meal,Gujarati,Tangy & Sweet & Mildly Spicy,Soft,Quick,Cheap–Moderate,"Family, Alone",Usual meal
+Gatte Ki Sabzi with Side,Meal,Rajasthani (North Indian),Tangy & Mildly Spicy,Soft,Moderate,Moderate,Family,Usual meal
+Kadhi Pakora with Side,Meal,North Indian,Tangy & Mildly Spicy,Soft & Crunchy,Moderate,Moderate,Family,"Cravings, Comfort eating"
+Payasam / Semiya,Dessert,South Indian,Sweet,Soft & Creamy,Moderate,Moderate,"Family, Group/Party","Cravings, Celebration"
+Gulab Jamun,Dessert,North Indian,Sweet,"Soft, Rich & Dense",Elaborate ,Moderate,"Family, Group/Party","Cravings, Celebration, Comfort eating"
+Rasmalai,Dessert,Bengali,Sweet,Soft & Creamy,Elaborate ,Moderate,"Family, Group/Party","Cravings, Celebration"
+Rasgulla,Dessert,Bengali,Sweet,Soft,Elaborate ,Moderate,"Family, Group/Party","Cravings, Celebration"
+Gajar Halwa,Dessert,North Indian,Sweet,"Soft, Rich & Dense",Elaborate ,Moderate,"Family, Group/Party","Cravings, Celebration, Comfort eating"
+Moong Dal Halwa,Dessert,North Indian,Sweet,"Soft, Rich & Dense",Moderate,Moderate,"Family, Group/Party","Cravings, Celebration"
+Ladoo,Dessert,Pan-indian,Sweet,Soft,Elaborate ,Cheap–Moderate,"Family, Group/Party","Cravings, Celebration"
+Cham Cham,Dessert,Bengali,Sweet,Soft & Creamy,Elaborate ,Moderate,"Family, Group/Party","Cravings, Celebration"
+Kalakand,Dessert,North Indian,Sweet,"Soft & Creamy, Rich & Dense",Moderate,Moderate,"Family, Group/Party","Cravings, Celebration, Comfort eating"
+Peda,Dessert,North Indian,Sweet,Soft,Moderate,Cheap–Moderate,"Family, Group/Party","Cravings, Celebration"
+Barfi,Dessert,Pan‑Indian,Sweet,Soft ,Moderate,Cheap–Moderate,"Family, Group/Party","Cravings, Celebration"
+Ghevar,Dessert,Rajasthani,Sweet,Soft & Crispy,Elaborate ,Moderate–Exp,"Family, Group/Party","Cravings, Celebration"
+Malpua,Dessert,Rajasthani,Sweet,"Soft & Crispy, Rich & Dense",Moderate,Moderate,"Family, Group/Party","Cravings, Celebration"
+Shrikhand,Dessert,Gujarati/Maharashtrian,Sweet,Soft & Creamy,Moderate,Cheap–Moderate,"Family, Group/Party","Cravings, Celebration"
+Tiramisu,Dessert,Italian,"Sweet, Mildly Bitter",Soft & Creamy,Moderate,Expensive,"Group/Party, Date","Cravings, Celebration"
+Brownie,Dessert,American,"Sweet, Chocolaty",Soft,Moderate,Moderate,"Family, Alone, Group/Party","Cravings, Celebration, Comfort eating"
+Cookie,Snack,Global,Sweet,Crispy,Quick,Cheap,"Family, Alone, Group/Party","Usual Snack, Cravings"
+Cheesecake,Dessert,American,Sweet,Soft,Moderate,Expensive,"Group/Party, Date","Cravings, Celebration"
+Cupcake,Dessert,American,Sweet,Soft,Moderate,Moderate,"Family, Group/Party, Date","Cravings, Celebration"
+Donut,Dessert,American,Sweet,Soft,Quick,Cheap–Moderate,"Group/Party, Date","Cravings, Celebration"
+Croissant,Dessert,French,Mild savoury/sweet,"Soft & Crispy, Flaky",Elaborate,Moderate–Expensive,"Group/Party, Date","Cravings, Celebration"
+Pastry,Dessert,Global,Sweet,Soft,Moderate,Moderate,"Family, Alone, Group/Party","Cravings, Celebration"
+Fruit Salad,Dessert,Global,"Refreshing, Sweet",Crunchy,Quick,Cheap,"Family, Alone, Group/Party","Usual, Healthy, Refreshing"
+Ice Cream,Dessert,Global,Sweet,Soft & Creamy,Moderate,Cheap–Moderate,"Family, Alone, Group/Party, Date","Cravings, Celebration"
+Kulfi,Dessert,North-Indian,Sweet,Soft & Creamy,Moderate,Cheap,"Family, Group/Party, Date","Cravings, Celebration"
+Smoothie,Beverage,Global,Sweet,Rich & Dense,Quick,Moderate,Alone,"Usual, Healthy, Refreshing"
+Milkshake,Beverage,American,Sweet,Rich & Dense,Quick,Moderate,"Family, Alone, Group/Party","Cravings, Celebration"
+Filter Coffee,Beverage,South Indian,"Sweet, Bitter",Soft,Quick,Cheap,"Family, Alone","Usual, Comfort eating"
+Masala Tea,Beverage,Pan‑Indian,"Sweet, Spicy",Soft,Quick,Cheap,"Family, Alone","Usual, Comfort eating"
+Cold Coffee,Beverage,Global,"Sweet, Mildly Bitter",Soft & Creamy,Quick,Moderate,"Alone, Group/Party, Date","Cravings, Celebration"
+Iced Tea,Beverage,Global,"Sweet, Mildly Bitter",Soft,Quick,Moderate,"Alone, Group/Party, Date","Cravings, Celebration"
+Hot Chocolate,Beverage,Global,"Sweet, Chocolaty",Soft & Creamy,Quick,Moderate,"Alone, Group/Party, Date","Cravings, Celebration, Comfort eating"
+Buttermilk,Beverage,Pan‑Indian,Mild Savoury,Soft,Quick,Cheap,"Family, Alone","Usual, Healthy, Refreshing"
+Lassi,Beverage,North Indian,Sweet,Soft & Creamy,Quick,Cheap–Moderate,"Family, Alone","Usual, Comfort eating, Refreshing"
+Fruit Juice,Beverage,Global,Sweet,Soft,Quick,Cheap,"Family, Alone","Usual, Healthy, Refreshing"
+Aam Panna,Beverage,Indian (Maharashtra),Tangy & Sweet & Spicy,Soft,Quick,Cheap,"Family, Alone","Cravings, Celebration, Refreshing"
+Kokum Sharbat,Beverage,Maharashtrian,Tangy & Sweet & Spicy,Soft,Moderate,Cheap–Moderate,"Family, Alone","Usual, Healthy, Refreshing"
+Aam Ras,Beverage,Indian (Mango Juice),Sweet,Soft,Quick,Moderate,"Family, Alone","Cravings, Celebration"
+Thandai,Beverage,North Indian (Holi),"Refreshing, Sweet",Soft,Moderate,Moderate,"Family, Alone","Cravings, Celebration, Refreshing"
+Shikanji,Beverage,North Indian,Tangy & Sweet & Spicy,Soft,Quick,Cheap,"Family, Alone, Group/Party","Usual, Comfort eating, Refreshing"
+Dahi Vada,Snack,North India,Tangy & Sweet & Spicy,Soft & Creamy,Moderate,Cheap,"Family, Alone","Cravings, Celebration"
+Raita (Vegetable Yogurt),Snack,Pan-Indian,Refreshing,Soft & Creamy,Quick,Cheap,"Family, Alone","Usual, Healthy, Refreshing"
