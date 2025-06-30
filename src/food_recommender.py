@@ -1,8 +1,3 @@
-"""
-Food Recommender System using Sentence Transformers
-Recommends food based on user mood and preferences using semantic similarity
-"""
-
 import pandas as pd
 import numpy as np
 from sklearn.metrics.pairwise import cosine_similarity
@@ -12,7 +7,6 @@ from typing import List, Dict, Any
 import warnings
 warnings.filterwarnings('ignore')
 
-# Try to import sentence transformers, use TF-IDF as fallback
 try:
     from sentence_transformers import SentenceTransformer
     SENTENCE_TRANSFORMERS_AVAILABLE = True
@@ -23,12 +17,6 @@ except ImportError:
 
 class FoodRecommender:
     def __init__(self, dataset_path: str = None):
-        """
-        Initialize the Food Recommender System
-        
-        Args:
-            dataset_path: Path to the CSV dataset file
-        """
         if dataset_path is None:
             dataset_path = os.path.join(os.path.dirname(__file__), 'Data', 'Dataset.csv')
         
@@ -51,7 +39,6 @@ class FoodRecommender:
         self._create_food_embeddings()
     
     def _load_dataset(self):
-        """Load the food dataset from CSV"""
         try:
             self.df = pd.read_csv(self.dataset_path)
             print(f"Dataset loaded successfully with {len(self.df)} food items")
@@ -61,8 +48,6 @@ class FoodRecommender:
             raise Exception(f"Error loading dataset: {str(e)}")
     
     def _prepare_features(self):
-        """Prepare combined text features for each food item"""
-        # Clean and combine relevant text features
         feature_columns = [
             'Food Item', 'Food Type', 'Cuisine', 'Taste Notes', 
             'Texture', 'Social Context', 'User Mood'
@@ -86,7 +71,6 @@ class FoodRecommender:
         print(f"Features prepared for {len(self.combined_features)} food items")
     
     def _initialize_model(self):
-        """Initialize the model (sentence transformers or TF-IDF fallback)"""
         if self.use_sentence_transformers:
             try:
                 # Using a lightweight but effective model for food/text similarity
@@ -112,7 +96,6 @@ class FoodRecommender:
         print("TF-IDF vectorizer initialized successfully")
     
     def _create_food_embeddings(self):
-        """Create embeddings for all food items"""
         try:
             print("Creating embeddings for food items...")
             
@@ -133,16 +116,6 @@ class FoodRecommender:
             raise Exception(f"Error creating food embeddings: {str(e)}")
     
     def get_recommendations(self, user_input: str, top_k: int = 8) -> List[Dict[str, Any]]:
-        """
-        Get food recommendations based on user input
-        
-        Args:
-            user_input: Natural language description of mood/preferences
-            top_k: Number of recommendations to return
-            
-        Returns:
-            List of recommended food items with details
-        """
         try:
             if self.use_sentence_transformers and self.model:
                 # Create embedding for user input using sentence transformers
@@ -183,7 +156,6 @@ class FoodRecommender:
             raise Exception(f"Error getting recommendations: {str(e)}")
     
     def get_dataset_stats(self) -> Dict[str, Any]:
-        """Get basic statistics about the dataset"""
         if self.df is None:
             return {}
         
@@ -197,25 +169,8 @@ class FoodRecommender:
         
         return stats
     
-    def search_by_cuisine(self, cuisine: str, limit: int = 10) -> List[Dict[str, Any]]:
-        """Search food items by specific cuisine"""
-        filtered_df = self.df[self.df['Cuisine'].str.contains(cuisine, case=False, na=False)]
-        
-        results = []
-        for _, row in filtered_df.head(limit).iterrows():
-            results.append({
-                'food_name': row['Food Item'],
-                'cuisine': row['Cuisine'],
-                'food_type': row['Food Type'],
-                'taste_notes': row['Taste Notes'],
-                'texture': row['Texture']
-            })
-        
-        return results
-
 
 if __name__ == "__main__":
-    # Test the recommender system
     try:
         recommender = FoodRecommender()
         
