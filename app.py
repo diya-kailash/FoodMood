@@ -2,9 +2,9 @@ import streamlit as st
 import pandas as pd
 from src.food_recommender import FoodRecommender
 import time
-import os
 import plotly.express as px
 import plotly.graph_objects as go
+
 
 # Page configuration
 st.set_page_config(
@@ -194,24 +194,6 @@ FOOD_EMOJIS = {
     'Beverage': '🥤',
 }
 
-CUISINE_EMOJIS = {
-    'South Indian': '',
-    'North Indian': '',
-    'Maharashtrian': '',
-    'Gujarati': '',
-    'Punjabi': '',
-    'Rajasthani': '',
-    'Bengali': '',
-    'Indo‑Chinese': '',
-    'Chinese': '',
-    'Italian': '',
-    'American': '',
-    'Mexican': '',
-    'Mediterranean': '',
-    'Pan-Indian': '',
-    'Global': '',
-    'French': ''
-}
 
 @st.cache_resource
 def load_recommender():
@@ -222,14 +204,11 @@ def load_recommender():
         return None
 
 def display_food_card(food_item, index):
-    """Display a food recommendation card"""
-    food_emoji = FOOD_EMOJIS.get(food_item['food_type'], '🍽️')
-    cuisine_emoji = CUISINE_EMOJIS.get(food_item['cuisine'], '🌍')
-    
+    food_emoji = FOOD_EMOJIS.get(food_item['food_type'], '🍽️')    
     card_html = f"""
     <div class="food-card">
         <div class="food-title">
-            {food_emoji} {food_item['food_name']} {cuisine_emoji}
+            {food_emoji} {food_item['food_name']} 
         </div>
         <div class="food-details">
             <strong>🏛️ Cuisine:</strong> {food_item['cuisine']}
@@ -259,8 +238,7 @@ def display_food_card(food_item, index):
     """
     st.markdown(card_html, unsafe_allow_html=True)
 
-def main():
-    
+def main(): 
     # Header
     st.markdown("""
     <div class="main-header">
