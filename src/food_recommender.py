@@ -19,14 +19,9 @@ class FoodRecommender:
         self.food_embeddings = None
         self.combined_features = None
         
-        # Load and prepare the dataset
         self._load_dataset()
         self._prepare_features()
-        
-        # Initialize models
         self._initialize_models()
-        
-        # Create embeddings for all food items
         self._create_food_embeddings()
     
     def _load_dataset(self):
@@ -79,7 +74,7 @@ class FoodRecommender:
             user_embedding = self.model.encode([user_input], convert_to_tensor=False)
             similarity_scores = cosine_similarity(user_embedding, self.food_embeddings)[0]
             
-            top_indices = np.argsort(similarity_scores)[::-1][:top_k * 3]  # Retrieve more for reranking
+            top_indices = np.argsort(similarity_scores)[::-1][:top_k * 3]  
             
             if use_cross_encoder and self.cross_encoder:
                 cross_inputs = [[user_input, self.combined_features[idx]] for idx in top_indices]
