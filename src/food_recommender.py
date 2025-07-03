@@ -9,12 +9,14 @@ import json
 from dataclasses import dataclass, asdict
 import re
 from datetime import datetime
-
-# Load environment variables
+import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import threading
+from functools import partial, lru_cache
+import hashlib
 from dotenv import load_dotenv
 load_dotenv()
 
-# Optional Groq import
 try:
     from groq import Groq
     GROQ_AVAILABLE = True
@@ -24,11 +26,19 @@ except ImportError:
 
 warnings.filterwarnings('ignore')
 
+def performance_monitor(func):
+    def wrapper(*args, **kwargs):
+        start_time = time.time()
+        result = func(*args, **kwargs)
+        end_time = time.time()
+        print(f"⚡ {func.__name__} completed in {end_time - start_time:.2f} seconds")
+        return result
+    return wrapper
+
 @dataclass
 class UserConstraints:
-    """Structured representation of user constraints extracted by AI"""
-    time_urgency: float = 0.0  # 0-1 scale
-    budget_constraint: float = 0.0  # 0-1 scale (1 = very budget conscious)
+    time_urgency: float = 0.0 
+    budget_constraint: float = 0.0  
     health_consciousness: float = 0.0
     comfort_seeking: float = 0.0
     mood_state: str = ""
@@ -36,6 +46,7 @@ class UserConstraints:
     cuisine_preferences: List[str] = None
     texture_preferences: List[str] = None
     taste_preferences: List[str] = None
+    food_type_preferences: List[str] = None
 
     def __post_init__(self):
         if self.social_requirements is None:
@@ -46,24 +57,25 @@ class UserConstraints:
             self.texture_preferences = []
         if self.taste_preferences is None:
             self.taste_preferences = []
+        if self.food_type_preferences is None:
+            self.food_type_preferences = []
 
 class FoodRecommender:
     def __init__(self, dataset_path: str = None):
         if dataset_path is None:
             dataset_path = os.path.join(os.path.dirname(__file__), 'Data', 'Dataset.csv')
-        
         self.dataset_path = dataset_path
         self.df = None
         self.model = None
         self.cross_encoder = None
         self.food_embeddings = None
         self.combined_features = None
-        
-        # Groq components - load API key from environment
         self.groq_api_key = os.getenv('GROQ_API_KEY')
         self.groq_client = None
+        self.max_workers = min(8, os.cpu_count() or 4)  # Limit concurrent threads
+        self._recommendation_cache = {}  # Simple cache for repeated queries
+        self._cache_max_size = 100  # Limit cache size
         
-        # Always try to setup Groq if API key is available
         if self.groq_api_key and self.groq_api_key != 'your-groq-api-key-here':
             self._setup_groq()
         else:
@@ -76,12 +88,10 @@ class FoodRecommender:
         self._create_food_embeddings()
     
     def _setup_groq(self):
-        """Setup Groq AI client"""
         if not GROQ_AVAILABLE:
             print("Warning: groq not available. Enhanced verification will be disabled.")
             self.groq_client = None
-            return
-            
+            return   
         try:
             self.groq_client = Groq(api_key=self.groq_api_key)
             print("Groq AI client configured successfully")
@@ -100,22 +110,16 @@ class FoodRecommender:
             raise Exception(f"Error loading dataset: {str(e)}")
     
     def _preprocess_dataset(self):
-        """Preprocess dataset with numerical mappings"""
         df = self.df.copy()
-        
-        # Create numerical mappings
         prep_time_mapping = {
             'Quick': 1.0, 'Moderate': 2.0, 'Elaborate': 3.0
         }
-        
         budget_mapping = {
             'Cheap': 1.0, 'Cheap–Moderate': 1.5, 'Moderate': 2.0,
             'Moderate‑Expensive': 2.5, 'Expensive': 3.0
         }
-        
         df['Prep Time Numeric'] = df['Prep Time'].map(prep_time_mapping).fillna(2.0)
         df['Budget Numeric'] = df['Budget'].map(budget_mapping).fillna(2.0)
-        
         return df
     
     def _prepare_features(self):
@@ -124,19 +128,15 @@ class FoodRecommender:
             'Texture', 'Social Context', 'User Mood',
             'Prep Time', 'Budget' 
         ]
-        
         self.combined_features = []
-        
         for _, row in self.df.iterrows():
             features = []
             for col in feature_columns:
                 if pd.notna(row.get(col, None)):
                     text = str(row[col]).strip().replace(',', ' ')
                     features.append(text)
-            
             combined_text = ' '.join(features)
             self.combined_features.append(combined_text)
-        
         print(f"Features prepared for {len(self.combined_features)} food items")
     
     def _initialize_models(self):
@@ -146,20 +146,47 @@ class FoodRecommender:
         print("Models loaded successfully")
     
     def _create_food_embeddings(self):
-        print("Creating embeddings for food items...")
-        self.food_embeddings = self.model.encode(
-            self.combined_features,
-            convert_to_tensor=False,
-            show_progress_bar=True
-        )
+        print("Creating embeddings for food items using parallel processing...")
+        batch_size = max(1, len(self.combined_features) // self.max_workers)
+        feature_batches = [
+            self.combined_features[i:i + batch_size] 
+            for i in range(0, len(self.combined_features), batch_size)
+        ]
+        def encode_batch(batch):
+            return self.model.encode(batch, convert_to_tensor=False, show_progress_bar=False)
+        
+        all_embeddings = []
+        with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+            future_to_batch = {
+                executor.submit(encode_batch, batch): i 
+                for i, batch in enumerate(feature_batches)
+            }
+            batch_results = [None] * len(feature_batches)
+            for future in as_completed(future_to_batch):
+                batch_idx = future_to_batch[future]
+                try:
+                    result = future.result()
+                    batch_results[batch_idx] = result
+                    print(f"✓ Encoded batch {batch_idx + 1}/{len(feature_batches)}")
+                except Exception as e:
+                    print(f"✗ Error encoding batch {batch_idx}: {e}")
+                    batch_results[batch_idx] = self.model.encode(
+                        feature_batches[batch_idx], 
+                        convert_to_tensor=False, 
+                        show_progress_bar=False
+                    )
+        for batch_result in batch_results:
+            if batch_result is not None:
+                if len(all_embeddings) == 0:
+                    all_embeddings = batch_result
+                else:
+                    all_embeddings = np.vstack([all_embeddings, batch_result])
+        self.food_embeddings = all_embeddings
         print(f"Embeddings created with shape: {np.array(self.food_embeddings).shape}")
     
-    def _extract_constraints_with_groq(self, user_input: str) -> UserConstraints:
-        """Extract user constraints using Groq AI"""
-        
+    def _extract_constraints_with_groq(self, user_input: str) -> UserConstraints: 
         if not self.groq_client:
-            return UserConstraints()  # Return default constraints if Groq not available
-        
+            return UserConstraints()  
         constraint_extraction_prompt = f"""
         You are an expert food preference analyzer. Analyze the following user input for food preferences and extract structured information.
 
@@ -171,11 +198,12 @@ class FoodRecommender:
         2. Budget Consciousness (0.0 = money no object, 1.0 = very budget conscious): Look for words like "cheap", "affordable", "tight budget"
         3. Health Consciousness (0.0 = not important, 1.0 = very health focused): Look for words like "healthy", "light", "nutritious", "diet"
         4. Comfort Seeking (0.0 = adventurous, 1.0 = seeking comfort): Look for words like "comfort", "cozy", "familiar", "stressed", "tired"
-        5. Social Context: List any mentioned contexts like "alone", "family", "friends", "party", "date", "group"
-        6. Mood State: Describe the user's mood in 1-2 words based on the input
+        5. Mood State: Describe the user's mood in 1-2 words based on the input
+        6. Social Context: List any mentioned contexts like "alone", "family", "friends", "party", "date", "group"
         7. Cuisine Preferences: List any specific cuisines mentioned
-        8. Texture Preferences: List any texture preferences mentioned like "crispy", "soft", "crunchy", "fried", "roasted", "mushy"
-        9. Taste Preferences: List any taste preferences mentioned like "spicy", "sweet", "mild", "tangy", "savoury"
+        8. Texture Preferences: List any texture preferences mentioned like "crispy", "soft", "crunchy", "fried", "roasted", "mushy", "creamy"
+        9. Taste Preferences: List any taste preferences mentioned like "spicy", "sweet", "mild", "tangy", "savoury", "umami"
+        10. Food Type Preferences: List any food type preferences mentioned like "snack", "meal", "light meal", "dessert", "beverage", "main course"
 
         Respond ONLY with a valid JSON object in this exact format:
         {{
@@ -183,11 +211,12 @@ class FoodRecommender:
             "budget_constraint": 0.0,
             "health_consciousness": 0.0,
             "comfort_seeking": 0.0,
-            "social_requirements": [],
             "mood_state": "",
+            "social_requirements": [],
             "cuisine_preferences": [],
             "texture_preferences": [],
-            "taste_preferences": []
+            "taste_preferences": [],
+            "food_type_preferences": []
         }}
 
         Make sure to provide a valid JSON response with no additional text or explanation.
@@ -207,30 +236,45 @@ class FoodRecommender:
             )
             response_text = chat_completion.choices[0].message.content.strip()
 
-            # Extract JSON from response
             json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
             if json_match:
                 constraints_dict = json.loads(json_match.group())
                 return UserConstraints(**constraints_dict)
             else:
-                # If no JSON found, try parsing the entire response
                 constraints_dict = json.loads(response_text)
                 return UserConstraints(**constraints_dict)
 
         except json.JSONDecodeError as e:
             print(f"JSON parsing error: {e}")
             print(f"Groq response: {response_text}")
-            # Return default constraints if parsing fails
             return UserConstraints()
         except Exception as e:
             print(f"Groq API error in constraint extraction: {e}")
             return UserConstraints()
     
+    def _analyze_single_candidate(self, args):
+        idx, constraints, similarity_score = args
+        try:
+            food_item = self.df.iloc[idx]
+            tradeoff_analysis = self._analyze_tradeoffs_with_groq(constraints, food_item)
+            
+            return {
+                'index': idx,
+                'similarity_score': similarity_score,
+                'tradeoff_analysis': tradeoff_analysis,
+                'combined_score': (similarity_score * 0.4 + tradeoff_analysis.get('overall_score', 0) * 0.6)
+            }
+        except Exception as e:
+            print(f"Error analyzing candidate {idx}: {e}")
+            return {
+                'index': idx,
+                'similarity_score': similarity_score,
+                'tradeoff_analysis': {"overall_score": 0.5, "overall_explanation": "Error in analysis"},
+                'combined_score': similarity_score * 0.4 + 0.5 * 0.6
+            }
+    
     def _analyze_tradeoffs_with_groq(self, constraints: UserConstraints, food_item: pd.Series) -> Dict[str, Any]:
-        """Analyze tradeoffs using Groq AI"""
-        
         if not self.groq_client:
-            # Return default analysis if Groq not available
             return {
                 "overall_score": 0.5,
                 "time_tradeoff": {"score": 0.5, "explanation": "Moderate match"},
@@ -238,10 +282,14 @@ class FoodRecommender:
                 "health_tradeoff": {"score": 0.5, "explanation": "Balanced choice"},
                 "comfort_tradeoff": {"score": 0.5, "explanation": "Satisfying option"},
                 "social_tradeoff": {"score": 0.5, "explanation": "Suitable choice"},
+                "cuisine_tradeoff": {"score": 0.5, "explanation": "Good cuisine match"},
+                "taste_tradeoff": {"score": 0.5, "explanation": "Decent taste match"},
+                "texture_tradeoff": {"score": 0.5, "explanation": "Suitable texture"},
+                "mood_tradeoff": {"score": 0.5, "explanation": "Mood appropriate"},
+                "food_type_tradeoff": {"score": 0.5, "explanation": "Type suitable"},
                 "overall_explanation": "Balanced recommendation"
             }
         
-        # Prepare food item description
         food_description = {
             'name': food_item.get('Food Item', ''),
             'type': food_item.get('Food Type', ''),
@@ -255,27 +303,24 @@ class FoodRecommender:
         }
 
         tradeoff_analysis_prompt = f"""
-        You are an expert food recommendation analyst. Analyze how well this food item satisfies the user's needs and what tradeoffs are involved.
+        Analyze food-user match. Score each tradeoff 0.0-1.0 (1.0=perfect).
 
-        User Constraints: {json.dumps(asdict(constraints), indent=2)}
+        User: {json.dumps(asdict(constraints))}
+        Food: {json.dumps(food_description)}
 
-        Food Item Details: {json.dumps(food_description, indent=2)}
+        Score these matches:
+        1. Time: prep time vs urgency
+        2. Budget: cost vs budget consciousness  
+        3. Health: healthiness vs health focus
+        4. Comfort: comfort level vs comfort seeking
+        5. Social: appropriateness for social context
+        6. Cuisine: cuisine match vs preferences
+        7. Taste: taste match vs preferences
+        8. Texture: texture match vs preferences
+        9. Mood: mood appropriateness
+        10. Type: food type vs preferences
 
-        Analyze the following tradeoffs and provide scores from 0.0 to 1.0:
-
-        1. Time Tradeoff: How well does the prep time match the user's time urgency?
-        2. Budget Tradeoff: How well does the cost match the user's budget constraints?
-        3. Health Tradeoff: How well does this match the user's health consciousness?
-        4. Comfort Tradeoff: How well does this match the user's comfort seeking needs?
-        5. Social Tradeoff: How appropriate is this for the user's social context?
-
-        For each tradeoff, provide:
-        - A score from 0.0 to 1.0 (1.0 = perfect match, 0.0 = poor match)
-        - A brief explanation (max 10 words)
-
-        Calculate an overall score as the weighted average of relevant tradeoffs.
-
-        Respond ONLY with a valid JSON object in this exact format:
+        JSON only:
         {{
             "overall_score": 0.0,
             "time_tradeoff": {{"score": 0.0, "explanation": ""}},
@@ -283,10 +328,13 @@ class FoodRecommender:
             "health_tradeoff": {{"score": 0.0, "explanation": ""}},
             "comfort_tradeoff": {{"score": 0.0, "explanation": ""}},
             "social_tradeoff": {{"score": 0.0, "explanation": ""}},
+            "cuisine_tradeoff": {{"score": 0.0, "explanation": ""}},
+            "taste_tradeoff": {{"score": 0.0, "explanation": ""}},
+            "texture_tradeoff": {{"score": 0.0, "explanation": ""}},
+            "mood_tradeoff": {{"score": 0.0, "explanation": ""}},
+            "food_type_tradeoff": {{"score": 0.0, "explanation": ""}},
             "overall_explanation": ""
         }}
-
-        Make sure to provide a valid JSON response with no additional text.
         """
 
         try:
@@ -303,7 +351,6 @@ class FoodRecommender:
             )
             response_text = chat_completion.choices[0].message.content.strip()
 
-            # Extract JSON from response
             json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
             if json_match:
                 return json.loads(json_match.group())
@@ -313,7 +360,6 @@ class FoodRecommender:
         except json.JSONDecodeError as e:
             print(f"JSON parsing error in tradeoff analysis: {e}")
             print(f"Groq response: {response_text}")
-            # Return default analysis if parsing fails
             return {
                 "overall_score": 0.5,
                 "time_tradeoff": {"score": 0.5, "explanation": "Moderate match"},
@@ -321,6 +367,11 @@ class FoodRecommender:
                 "health_tradeoff": {"score": 0.5, "explanation": "Balanced choice"},
                 "comfort_tradeoff": {"score": 0.5, "explanation": "Satisfying option"},
                 "social_tradeoff": {"score": 0.5, "explanation": "Suitable choice"},
+                "cuisine_tradeoff": {"score": 0.5, "explanation": "Good cuisine match"},
+                "taste_tradeoff": {"score": 0.5, "explanation": "Decent taste match"},
+                "texture_tradeoff": {"score": 0.5, "explanation": "Suitable texture"},
+                "mood_tradeoff": {"score": 0.5, "explanation": "Mood appropriate"},
+                "food_type_tradeoff": {"score": 0.5, "explanation": "Type suitable"},
                 "overall_explanation": "Balanced recommendation"
             }
         except Exception as e:
@@ -332,43 +383,97 @@ class FoodRecommender:
                 "health_tradeoff": {"score": 0.5, "explanation": "Balanced choice"},
                 "comfort_tradeoff": {"score": 0.5, "explanation": "Satisfying option"},
                 "social_tradeoff": {"score": 0.5, "explanation": "Suitable choice"},
+                "cuisine_tradeoff": {"score": 0.5, "explanation": "Good cuisine match"},
+                "taste_tradeoff": {"score": 0.5, "explanation": "Decent taste match"},
+                "texture_tradeoff": {"score": 0.5, "explanation": "Suitable texture"},
+                "mood_tradeoff": {"score": 0.5, "explanation": "Mood appropriate"},
+                "food_type_tradeoff": {"score": 0.5, "explanation": "Type suitable"},
                 "overall_explanation": "Balanced recommendation"
             }
     
+    def _get_cache_key(self, user_input: str, top_k: int) -> str:
+        content = f"{user_input.lower().strip()}_{top_k}"
+        return hashlib.md5(content.encode()).hexdigest()
+    
+    def _cache_recommendations(self, cache_key: str, recommendations: List[Dict[str, Any]]):
+        if len(self._recommendation_cache) >= self._cache_max_size:
+            oldest_key = next(iter(self._recommendation_cache))
+            del self._recommendation_cache[oldest_key]
+        
+        self._recommendation_cache[cache_key] = {
+            'recommendations': recommendations,
+            'timestamp': time.time()
+        }
+    
+    @performance_monitor
     def get_recommendations(self, user_input: str, top_k: int = 8, use_cross_encoder: bool = True) -> List[Dict[str, Any]]:
-        """Get AI-powered recommendations using Groq analysis (primary method)"""
-        # Always try to use intelligent recommendations first
+        cache_key = self._get_cache_key(user_input, top_k)
+        if cache_key in self._recommendation_cache:
+            cached_data = self._recommendation_cache[cache_key]
+            if time.time() - cached_data['timestamp'] < 300:
+                print("🚀 Retrieved from cache (instant)")
+                return cached_data['recommendations']
+            else:
+                del self._recommendation_cache[cache_key]
         if self.groq_client:
             try:
-                return self.get_intelligent_recommendations(user_input, top_k)
+                recommendations = self.get_intelligent_recommendations(user_input, top_k)
             except Exception as e:
                 print(f"⚠️  Groq analysis failed, falling back to similarity matching: {str(e)}")
+                recommendations = self._get_similarity_recommendations(user_input, top_k, use_cross_encoder)
+        else:
+            recommendations = self._get_similarity_recommendations(user_input, top_k, use_cross_encoder)
+        self._cache_recommendations(cache_key, recommendations)
         
-        # Fallback to similarity-based recommendations
-        return self._get_similarity_recommendations(user_input, top_k, use_cross_encoder)
+        return recommendations
     
     def _get_similarity_recommendations(self, user_input: str, top_k: int = 8, use_cross_encoder: bool = True) -> List[Dict[str, Any]]:
-        """Fallback method for similarity-based recommendations"""
         try:
             user_embedding = self.model.encode([user_input], convert_to_tensor=False)
             similarity_scores = cosine_similarity(user_embedding, self.food_embeddings)[0]
-            
             top_indices = np.argsort(similarity_scores)[::-1][:top_k * 3]  
-            
             if use_cross_encoder and self.cross_encoder:
                 cross_inputs = [[user_input, self.combined_features[idx]] for idx in top_indices]
-                cross_scores = self.cross_encoder.predict(cross_inputs)
+                batch_size = max(1, len(cross_inputs) // self.max_workers)
+                input_batches = [
+                    cross_inputs[i:i + batch_size] 
+                    for i in range(0, len(cross_inputs), batch_size)
+                ]
+                
+                def process_cross_batch(batch):
+                    return self.cross_encoder.predict(batch)
+                all_scores = []
+                with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                    future_to_batch = {
+                        executor.submit(process_cross_batch, batch): i 
+                        for i, batch in enumerate(input_batches)
+                    }
+                    batch_results = [None] * len(input_batches)
+                    for future in as_completed(future_to_batch):
+                        batch_idx = future_to_batch[future]
+                        try:
+                            batch_results[batch_idx] = future.result()
+                        except Exception as e:
+                            print(f"Cross-encoder batch {batch_idx} failed: {e}")
+                            batch_size = len(input_batches[batch_idx])
+                            start_idx = batch_idx * len(input_batches[0]) if batch_idx < len(input_batches) - 1 else batch_idx * batch_size
+                            batch_results[batch_idx] = similarity_scores[top_indices[start_idx:start_idx + batch_size]]
+                for batch_result in batch_results:
+                    if batch_result is not None:
+                        if len(all_scores) == 0:
+                            all_scores = batch_result
+                        else:
+                            all_scores = np.concatenate([all_scores, batch_result])
+                cross_scores = all_scores
                 reranked = sorted(zip(top_indices, cross_scores), key=lambda x: x[1], reverse=True)
                 top_indices = [idx for idx, _ in reranked[:top_k]]
             else:
                 top_indices = top_indices[:top_k]
             
-            recommendations = []
-            for idx in top_indices:
+            def build_recommendation(idx):
                 food_item = self.df.iloc[idx]
                 score = similarity_scores[idx]
-                
-                recommendation = {
+                return {
                     'food_name': food_item.get('Food Item', ''),
                     'cuisine': food_item.get('Cuisine', ''),
                     'food_type': food_item.get('Food Type', ''),
@@ -379,61 +484,74 @@ class FoodRecommender:
                     'social_context': food_item.get('Social Context', ''),
                     'user_mood': food_item.get('User Mood', ''),
                     'similarity_score': round(score, 3),
-                    'tradeoff_score': round(score, 3),  # Use similarity as fallback
+                    'tradeoff_score': round(score, 3),
                     'combined_score': round(score, 3),
-                    'tradeoff_explanation': 'Based on similarity matching (Gemini not available)',
+                    'tradeoff_explanation': 'Based on similarity matching (fast mode)',
                     'detailed_tradeoffs': {
                         'overall_score': score,
                         'overall_explanation': 'Based on similarity matching'
                     }
                 }
-                recommendations.append(recommendation)
             
+            recommendations = []
+            with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                future_to_idx = {
+                    executor.submit(build_recommendation, idx): idx 
+                    for idx in top_indices
+                }
+                for future in as_completed(future_to_idx):
+                    try:
+                        recommendation = future.result()
+                        recommendations.append(recommendation)
+                    except Exception as e:
+                        idx = future_to_idx[future]
+                        print(f"Error building recommendation for {idx}: {e}")
+            recommendations.sort(key=lambda x: x['combined_score'], reverse=True)
             return recommendations
         
         except Exception as e:
             raise Exception(f"Error getting recommendations: {str(e)}")
     
+    @performance_monitor
     def get_intelligent_recommendations(self, user_input: str, top_k: int = 8) -> List[Dict[str, Any]]:
-        """Get recommendations using Groq-based constraint extraction and tradeoff analysis"""
-
         try:
-            # Extract constraints using Groq (if available)
             if self.groq_client:
                 print("Extracting constraints with Groq...")
                 constraints = self._extract_constraints_with_groq(user_input)
                 print(f"Extracted constraints: {asdict(constraints)}")
             else:
                 constraints = UserConstraints()
-
-            # Get semantic similarity scores
             user_embedding = self.model.encode([user_input], convert_to_tensor=False)
             similarity_scores = cosine_similarity(user_embedding, self.food_embeddings)[0]
-
-            # Get top candidates for detailed analysis
             top_candidates = np.argsort(similarity_scores)[::-1][:top_k * 2]
-
             if self.groq_client:
-                print(f"Analyzing tradeoffs for top {len(top_candidates)} candidates...")
-                # Analyze tradeoffs for each candidate using Groq
+                print(f"Analyzing tradeoffs for top {len(top_candidates)} candidates using parallel processing...")
+                analysis_args = [
+                    (idx, constraints, similarity_scores[idx]) 
+                    for idx in top_candidates
+                ]
                 candidate_analyses = []
-                for i, idx in enumerate(top_candidates):
-                    print(f"Analyzing candidate {i+1}/{len(top_candidates)}: {self.df.iloc[idx]['Food Item']}")
-                    food_item = self.df.iloc[idx]
-                    tradeoff_analysis = self._analyze_tradeoffs_with_groq(constraints, food_item)
-
-                    candidate_analyses.append({
-                        'index': idx,
-                        'similarity_score': similarity_scores[idx],
-                        'tradeoff_analysis': tradeoff_analysis,
-                        'combined_score': (similarity_scores[idx] * 0.4 +
-                                         tradeoff_analysis.get('overall_score', 0) * 0.6)
-                    })
-
-                # Sort by combined score
+                with ThreadPoolExecutor(max_workers=self.max_workers) as executor:
+                    future_to_idx = {
+                        executor.submit(self._analyze_single_candidate, args): args[0] 
+                        for args in analysis_args
+                    }
+                    for i, future in enumerate(as_completed(future_to_idx)):
+                        idx = future_to_idx[future]
+                        try:
+                            result = future.result()
+                            candidate_analyses.append(result)
+                            print(f"✓ Completed {i+1}/{len(top_candidates)}: {self.df.iloc[idx]['Food Item']}")
+                        except Exception as e:
+                            print(f"✗ Error with candidate {idx}: {e}")
+                            candidate_analyses.append({
+                                'index': idx,
+                                'similarity_score': similarity_scores[idx],
+                                'tradeoff_analysis': {"overall_score": 0.5, "overall_explanation": "Analysis failed"},
+                                'combined_score': similarity_scores[idx] * 0.4 + 0.5 * 0.6
+                            })
                 candidate_analyses.sort(key=lambda x: x['combined_score'], reverse=True)
             else:
-                # Fallback to similarity-only ranking
                 candidate_analyses = []
                 for idx in top_candidates[:top_k]:
                     candidate_analyses.append({
@@ -445,13 +563,10 @@ class FoodRecommender:
                         },
                         'combined_score': similarity_scores[idx]
                     })
-
-            # Build final recommendations
             recommendations = []
             for analysis in candidate_analyses[:top_k]:
                 idx = analysis['index']
                 food_item = self.df.iloc[idx]
-
                 recommendation = {
                     'food_name': food_item.get('Food Item', ''),
                     'cuisine': food_item.get('Cuisine', ''),
@@ -469,24 +584,17 @@ class FoodRecommender:
                     'detailed_tradeoffs': analysis['tradeoff_analysis']
                 }
                 recommendations.append(recommendation)
-
             return recommendations
 
         except Exception as e:
             raise Exception(f"Error getting intelligent recommendations: {str(e)}")
     
-    def explain_recommendation_with_groq(self, user_input: str, food_name: str) -> str:
-        """Get detailed explanation for a specific recommendation using Groq"""
-        
+    def explain_recommendation_with_groq(self, user_input: str, food_name: str) -> str:        
         if not self.groq_client:
             return f"Enhanced explanations require Groq API key. {food_name} was recommended based on similarity matching."
-
-        # Find the food item
         food_item = self.df[self.df['Food Item'] == food_name].iloc[0] if len(self.df[self.df['Food Item'] == food_name]) > 0 else None
-
         if food_item is None:
             return f"Food item '{food_name}' not found in dataset."
-
         explanation_prompt = f"""
         Explain why "{food_name}" is a good recommendation for this user request in a conversational, friendly way.
 
@@ -525,7 +633,6 @@ class FoodRecommender:
     def get_dataset_stats(self) -> Dict[str, Any]:
         if self.df is None:
             return {}
-        
         stats = {
             'total_items': len(self.df),
             'cuisines': self.df['Cuisine'].nunique(),
@@ -538,18 +645,12 @@ class FoodRecommender:
 
 if __name__ == "__main__":
     try:
-        # Initialize recommender (without Groq for basic testing)
         recommender = FoodRecommender()
-        
         test_input = "I want something quick to make, comforting, warm and under a tight budget"
-        
-        # Test basic recommendations (now AI-powered if API key available)
         print("=== AI-POWERED RECOMMENDATIONS ===")
         recommendations = recommender.get_recommendations(test_input, top_k=5)
-        
         print(f"\nRecommendations for: '{test_input}'")
-        print("-" * 60)
-        
+        print("-" * 60)      
         for i, rec in enumerate(recommendations, 1):
             print(f"{i}. {rec['food_name']} ({rec['cuisine']})")
             print(f"   Type: {rec['food_type']}")
@@ -560,20 +661,16 @@ if __name__ == "__main__":
                 print(f"   AI Explanation: {rec['tradeoff_explanation']}")
             else:
                 print(f"   Similarity Score: {rec['similarity_score']}")
-            print()
-        
-        # Test intelligent recommendations (works without Groq API but with enhanced features)
+            print()  
+
         print("\n=== INTELLIGENT RECOMMENDATIONS (No Groq) ===")
         intelligent_recs = recommender.get_intelligent_recommendations(test_input, top_k=5)
-        
         for i, rec in enumerate(intelligent_recs, 1):
             print(f"{i}. {rec['food_name']} ({rec['cuisine']})")
             print(f"   Type: {rec['food_type']} | Prep: {rec['prep_time']} | Budget: {rec['budget']}")
             print(f"   Scores - Similarity: {rec['similarity_score']}, Combined: {rec['combined_score']}")
             print(f"   Explanation: {rec['tradeoff_explanation']}")
             print()
-        
-        # Instructions for Groq usage
         print("\n=== GROQ INTEGRATION ===")
         if recommender.groq_client:
             print("✅ Groq AI is enabled and working!")
@@ -584,6 +681,5 @@ if __name__ == "__main__":
             print("1. Get a Groq API key from https://console.groq.com/keys")
             print("2. Add GROQ_API_KEY=your-api-key to .env file")
             print("3. Restart the application")
-    
     except Exception as e:
         print(f"Error testing recommender: {str(e)}")
