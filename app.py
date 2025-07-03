@@ -4,6 +4,11 @@ from src.food_recommender import FoodRecommender
 import time
 import plotly.express as px
 import plotly.graph_objects as go
+import os
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 
 # Page configuration
@@ -11,7 +16,7 @@ st.set_page_config(
     page_title=" FoodMood - AI Food Recommender",
     page_icon="🍽️",
     layout="wide",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="expanded",
 )
 
 st.markdown("""
@@ -197,6 +202,7 @@ FOOD_EMOJIS = {
 
 @st.cache_resource
 def load_recommender():
+    """Load the food recommender with automatic AI detection"""
     try:
         return FoodRecommender()
     except Exception as e:
@@ -204,7 +210,12 @@ def load_recommender():
         return None
 
 def display_food_card(food_item, index):
-    food_emoji = FOOD_EMOJIS.get(food_item['food_type'], '🍽️')    
+    food_emoji = FOOD_EMOJIS.get(food_item['food_type'], '🍽️')
+    
+    # Only show combined score
+    combined_score = food_item.get('combined_score', 'N/A')
+    score_html = f'<div class="food-score">⭐ Match Score: {combined_score}</div>'
+    
     card_html = f"""
     <div class="food-card">
         <div class="food-title">
@@ -231,9 +242,7 @@ def display_food_card(food_item, index):
         <div class="food-details">
             <strong>👥 Social Context:</strong> {food_item['social_context']}
         </div>
-        <div class="food-score">
-            🎯 Match Score: {food_item['similarity_score']}
-        </div>
+        {score_html}
     </div>
     """
     st.markdown(card_html, unsafe_allow_html=True)
@@ -247,12 +256,21 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Load recommender system
+    # Load recommender system with automatic AI detection
     recommender = load_recommender()
-    
     if recommender is None:
         st.error("Failed to load the food recommender system. Please check your setup.")
         return
+    
+    # Show AI status - require Groq for the app to work
+    with st.sidebar:
+        if hasattr(recommender, 'groq_client') and recommender.groq_client:
+            st.success("🧠 AI Analysis: Enabled")
+            st.markdown("*Powered by Groq AI (Llama3-70B)*")
+        else:
+            st.error("❌ Groq AI Required")
+            st.markdown("*Please configure Groq API key*")
+            st.stop()  # Stop the app if Groq is not available
     
     # Sidebar with dataset stats
     with st.sidebar:
@@ -369,19 +387,19 @@ def main():
     # Recommendation button
     if st.button("🔍 Get Food Recommendations", type="primary"):
         if user_input.strip():
-            with st.spinner("🤖 AI is analyzing your mood and finding perfect food matches..."):
+            with st.spinner("AI is analyzing your mood and finding perfect food matches..."):
                 try:
                     # Add a small delay for better UX
                     time.sleep(1)
                     
-                    # Get recommendations
+                    # Get AI-powered recommendations
                     recommendations = recommender.get_recommendations(
                         user_input, 
                         top_k=num_recommendations
                     )
                     
                     if recommendations:
-                        st.markdown("## 🎯 Your Personalized Food Recommendations")
+                        st.markdown("## 🧠 AI-Enhanced Personalized Food Recommendations")
                         st.markdown(f"*Based on: \"{user_input}\"*")
                         
                         # Display recommendations in a grid
@@ -391,10 +409,24 @@ def main():
                             with col1:
                                 if i < len(recommendations):
                                     display_food_card(recommendations[i], i+1)
+                                    
+                                    # Show detailed AI explanation
+                                    with st.expander(f"🤖 Why {recommendations[i]['food_name']}?"):
+                                        explanation = recommender.explain_recommendation_with_groq(
+                                            user_input, recommendations[i]['food_name']
+                                        )
+                                        st.write(explanation)
                             
                             with col2:
                                 if i+1 < len(recommendations):
                                     display_food_card(recommendations[i+1], i+2)
+                                    
+                                    # Show detailed AI explanation
+                                    with st.expander(f"🤖 Why {recommendations[i+1]['food_name']}?"):
+                                        explanation = recommender.explain_recommendation_with_groq(
+                                            user_input, recommendations[i+1]['food_name']
+                                        )
+                                        st.write(explanation)
                         
                         # Additional info
                         st.markdown("---")
