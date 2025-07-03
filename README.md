@@ -10,131 +10,123 @@ The project combines semantic similarity matching with AI-powered constraint ana
 
 ## 🚀 How to Run the Project
 
-### Option 1 — Command Line
-
+### Option 1: Command Line
 ```bash
 python run.py
 ```
 
-### Option 2 — Streamlit App
+### Option 2: Streamlit App
 
 ```bash
 streamlit run app.py
 ```
 
-### Option 3 — API Server
+### Option 3: API Server
 
 ```bash
 python api.py
 ```
 
-Access the API at: [http://localhost:8000](http://localhost:8000)
+Access the API at: `http://localhost:8000`
 
----
-
-### 📦 First-Time Dependencies
-
-Install the necessary packages (one-time setup):
+### First-Time Dependencies
 
 ```bash
 pip install streamlit sentence-transformers pandas numpy scikit-learn plotly fastapi uvicorn groq python-dotenv nltk scipy statsmodels matplotlib seaborn requests python-multipart
 ```
 
----
-
-### 🔑 Environment Setup
+### Environment Setup
 
 1. Create a `.env` file in the project root.
 2. Add your Groq API key:
 
-   ```
-   GROQ_API_KEY=your-api-key-here
-   ```
+```
+GROQ_API_KEY=your-api-key-here
+```
 
-   You can get your API key from: [https://console.groq.com/keys](https://console.groq.com/keys)
+Get your API key from: [Groq Console](https://console.groq.com/keys)
 
 ---
 
-## 🛠️ Tech Stack Used
+## 🛠️ Tech Stack
 
 ### Core AI & Machine Learning
 
 * Sentence Transformers (`all-MiniLM-L6-v2`) for semantic embeddings
 * Cross-Encoder (`ms-marco-MiniLM-L-6-v2`) for reranking recommendations
-* Scikit-learn for similarity calculations
-* NumPy and Pandas for data processing
+* Scikit-learn for cosine similarity
+* NumPy & Pandas for data processing
 
 ### AI Language Model
 
-* Groq API (Llama3-70B-8192) for intelligent constraint analysis and explanations
+* Groq API (Llama3-70B-8192) for constraint analysis and explanations
 
-### Web Technologies
+### Web Frameworks
 
-* Streamlit for interactive web app
-* FastAPI for RESTful API backend
-* Uvicorn as ASGI server
-* Plotly for interactive charts
+* Streamlit for interactive web application
+* FastAPI for RESTful API
+* Uvicorn as the ASGI server
+* Plotly for interactive charts and graphs
 
 ### Performance & Optimization
 
 * ThreadPoolExecutor for parallel processing
-* LRU Caching for faster responses
-* Dataclasses for structured constraint handling
+* LRU Cache for improved response times
+* Dataclasses for structured data handling
 
 ---
 
 ## 📊 Dataset Overview
 
-FoodMood uses a curated dataset (`Dataset.csv`) with 100+ food items from Indian and international cuisines.
+The project uses a comprehensive food dataset (`Dataset.csv`) with over 65 food items spanning multiple cuisines.
 
-### Dataset Columns:
+### Dataset Columns
 
-| Column         | Description                                            |
-| -------------- | ------------------------------------------------------ |
-| Food Item      | Name of the dish (e.g., Idli, Pizza, Burger)           |
-| Food Type      | Meal category (Meal, Snack, Dessert)                   |
-| Cuisine        | Regional/International cuisine (South Indian, Italian) |
-| Taste Notes    | Flavor profile (Spicy, Sweet, Tangy)                   |
-| Texture        | Physical texture (Soft, Crispy, Crunchy)               |
-| Prep Time      | Cooking duration (Quick, Moderate, Elaborate)          |
-| Budget         | Cost level (Cheap, Moderate, Expensive)                |
-| Social Context | Dining setting (Family, Alone, Group, Date)            |
-| User Mood      | Applicable moods (Usual, Cravings, Comfort)            |
+* **Food Item**: Name of the dish (e.g., Idli, Pizza, Burger)
+* **Food Type**: Category (Meal, Snack, Dessert)
+* **Cuisine**: Regional or international (South Indian, Italian, Chinese)
+* **Taste Notes**: Flavor profile (Spicy, Sweet, Tangy)
+* **Texture**: Physical texture (Soft, Crispy, Creamy)
+* **Prep Time**: Cooking duration (Quick, Moderate, Elaborate)
+* **Budget**: Cost category (Cheap, Moderate, Expensive)
+* **Social Context**: Dining situation (Family, Alone, Group, Date)
+* **User Mood**: Suitable moods (Usual, Cravings, Comfort)
 
 ---
 
-## ✨ Key Features Summary
+## ✨ Key Features
 
-### 🧠 AI-Powered Recommendations
+### AI-Powered Recommendations
 
-* Understands mood through natural language
-* Semantic similarity matching using transformer embeddings
-* Reranking for higher accuracy via cross-encoder
-* Automated constraint extraction using LLMs
-* Trade-off analysis for more balanced suggestions
+* Natural language understanding of user mood
+* Semantic similarity matching with transformer models
+* Cross-encoder reranking for higher accuracy
+* Constraint extraction and analysis using large language models
+* Tradeoff analysis for balanced recommendations
 * Multi-factor scoring combining similarity and constraints
-* AI-generated explanations for each recommendation
+* AI-generated explanations for recommendations
 
-### ⚡ Performance Features
+### Performance Highlights
 
-* Parallel processing for fast recommendations
-* Intelligent caching system
-* Batch embedding creation for efficiency
-* Real-time speed monitoring and optimization
+* Parallel processing for faster responses
+* Intelligent caching for quicker results
+* Batch embedding for efficiency
+* Real-time performance monitoring
 
-### 🖥️ User Interfaces
+### User Interfaces
 
-* Streamlit Web App with real-time interactivity
-* FastAPI REST API with automatic Swagger docs
-* Dark-themed responsive UI with visualizations
+* Streamlit web app with real-time recommendations
+* FastAPI REST API with automatic documentation
+* Responsive design and dark theme
+* Interactive dataset visualizations
 
-### 📱 User Experience
+### User Experience
 
-* Sample prompt suggestions
-* Expandable AI explanations
-* Customizable number of recommendations (5–12)
+* Prompt suggestions for inspiration
+* Expandable explanations for each recommendation
+* Adjustable number of suggestions (5-12)
 * Visual food cards with emojis
-* Loading animations and progress bars
+* Loading animations and progress indicators
 
 ---
 
