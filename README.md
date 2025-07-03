@@ -9,6 +9,3 @@ python run.py
 Option 3 - Direct Streamlit:
 streamlit run app.py
 
-📦 First Time Dependencies:
-If you need to install dependencies manually (one-time only):
-pip install streamlit sentence-transformers pandas numpy scikit-learn plotly

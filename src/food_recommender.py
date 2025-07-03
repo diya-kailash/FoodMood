@@ -72,9 +72,9 @@ class FoodRecommender:
         self.combined_features = None
         self.groq_api_key = os.getenv('GROQ_API_KEY')
         self.groq_client = None
-        self.max_workers = min(8, os.cpu_count() or 4)  # Limit concurrent threads
-        self._recommendation_cache = {}  # Simple cache for repeated queries
-        self._cache_max_size = 100  # Limit cache size
+        self.max_workers = min(8, os.cpu_count() or 4)  
+        self._recommendation_cache = {}  
+        self._cache_max_size = 100  
         
         if self.groq_api_key and self.groq_api_key != 'your-groq-api-key-here':
             self._setup_groq()
