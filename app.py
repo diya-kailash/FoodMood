@@ -6,12 +6,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 import os
 from dotenv import load_dotenv
-
-# Load environment variables
 load_dotenv()
 
-
-# Page configuration
 st.set_page_config(
     page_title=" FoodMood - AI Food Recommender",
     page_icon="🍽️",
@@ -202,7 +198,6 @@ FOOD_EMOJIS = {
 
 @st.cache_resource
 def load_recommender():
-    """Load the food recommender with automatic AI detection"""
     try:
         return FoodRecommender()
     except Exception as e:
@@ -211,8 +206,6 @@ def load_recommender():
 
 def display_food_card(food_item, index):
     food_emoji = FOOD_EMOJIS.get(food_item['food_type'], '🍽️')
-    
-    # Only show combined score
     combined_score = food_item.get('combined_score', 'N/A')
     score_html = f'<div class="food-score">⭐ Match Score: {combined_score}</div>'
     
@@ -248,7 +241,6 @@ def display_food_card(food_item, index):
     st.markdown(card_html, unsafe_allow_html=True)
 
 def main(): 
-    # Header
     st.markdown("""
     <div class="main-header">
         <h1>🍽️ FoodMood - AI Food Recommender</h1>
@@ -256,13 +248,10 @@ def main():
     </div>
     """, unsafe_allow_html=True)
     
-    # Load recommender system with automatic AI detection
     recommender = load_recommender()
     if recommender is None:
         st.error("Failed to load the food recommender system. Please check your setup.")
         return
-    
-    # Show AI status - require Groq for the app to work
     with st.sidebar:
         if hasattr(recommender, 'groq_client') and recommender.groq_client:
             st.success("🧠 AI Analysis: Enabled")
@@ -270,9 +259,7 @@ def main():
         else:
             st.error("❌ Groq AI Required")
             st.markdown("*Please configure Groq API key*")
-            st.stop()  # Stop the app if Groq is not available
-    
-    # Sidebar with dataset stats
+            st.stop() 
     with st.sidebar:
         st.markdown("## 📊 Dataset Overview")
         
@@ -302,7 +289,6 @@ def main():
             
             # Food type distribution pie chart
             st.markdown("### 🍽️ Food Type Distribution")
-            
             food_type_counts = {}
             for food_type in stats['unique_food_types']:
                 if 'Meal' in food_type:
@@ -315,8 +301,6 @@ def main():
                     food_type_counts['Beverages'] = food_type_counts.get('Beverages', 0) + 1
                 else:
                     food_type_counts['Others'] = food_type_counts.get('Others', 0) + 1
-            
-            # Create pie chart
             fig = go.Figure(data=[go.Pie(
                 labels=list(food_type_counts.keys()),
                 values=list(food_type_counts.values()),
@@ -367,68 +351,47 @@ def main():
         except Exception as e:
             st.error(f"Error loading stats: {str(e)}")
     
-    # Main input section
     st.markdown("### 💭 Tell us about your food mood...")
-    
-    # Text input for user description
     user_input = st.text_area(
         "Describe how you're feeling and what kind of food you're craving:",
         placeholder="Example: I'm feeling stressed and want something comforting and sweet to cheer me up...",
         height=100
     )
-    
-    # Number of recommendations (moved to left side)
     num_recommendations = st.selectbox(
         "🔢 Number of recommendations:",
         options=[5, 8, 10, 12],
         index=1
     )
-    
-    # Recommendation button
     if st.button("🔍 Get Food Recommendations", type="primary"):
         if user_input.strip():
             with st.spinner("AI is analyzing your mood and finding perfect food matches..."):
                 try:
-                    # Add a small delay for better UX
                     time.sleep(1)
-                    
-                    # Get AI-powered recommendations
                     recommendations = recommender.get_recommendations(
                         user_input, 
                         top_k=num_recommendations
                     )
-                    
                     if recommendations:
                         st.markdown("## 🧠 AI-Enhanced Personalized Food Recommendations")
                         st.markdown(f"*Based on: \"{user_input}\"*")
-                        
-                        # Display recommendations in a grid
                         for i in range(0, len(recommendations), 2):
                             col1, col2 = st.columns(2)
-                            
                             with col1:
                                 if i < len(recommendations):
                                     display_food_card(recommendations[i], i+1)
-                                    
-                                    # Show detailed AI explanation
                                     with st.expander(f"🤖 Why {recommendations[i]['food_name']}?"):
                                         explanation = recommender.explain_recommendation_with_groq(
                                             user_input, recommendations[i]['food_name']
                                         )
-                                        st.write(explanation)
-                            
+                                        st.write(explanation)                            
                             with col2:
                                 if i+1 < len(recommendations):
                                     display_food_card(recommendations[i+1], i+2)
-                                    
-                                    # Show detailed AI explanation
                                     with st.expander(f"🤖 Why {recommendations[i+1]['food_name']}?"):
                                         explanation = recommender.explain_recommendation_with_groq(
                                             user_input, recommendations[i+1]['food_name']
                                         )
                                         st.write(explanation)
-                        
-                        # Additional info
                         st.markdown("---")
                         st.markdown("### 💡 Tips:")
                         st.markdown("""
@@ -445,10 +408,8 @@ def main():
         else:
             st.warning("⚠️ Please describe your food mood to get recommendations!")
     
-    # Sample prompts section
     st.markdown("---")
     st.markdown("### 💡 Need inspiration? Try these sample prompts:")
-    
     sample_prompts = [
         "🎉 I'm celebrating and want something festive and sweet",
         "😴 I'm tired after work and need comfort food",
@@ -459,22 +420,18 @@ def main():
         "🎂 Having a party and need crowd-pleasing snacks",
         "☔ It's raining and I want something warm and cozy"
     ]
-    
     cols = st.columns(2)
     for i, prompt in enumerate(sample_prompts):
         col = cols[i % 2]
         with col:
             if st.button(prompt, key=f"sample_{i}"):
-                st.session_state.sample_prompt = prompt.split(' ', 1)[1]  # Remove emoji
+                st.session_state.sample_prompt = prompt.split(' ', 1)[1]  
                 st.rerun()
     
-    # Handle sample prompt selection
     if 'sample_prompt' in st.session_state:
         user_input = st.session_state.sample_prompt
         del st.session_state.sample_prompt
         st.rerun()
-    
-    # Footer
     st.markdown("---")
     st.markdown("""
     <div style="text-align: center; color: #888; padding: 2rem;">
