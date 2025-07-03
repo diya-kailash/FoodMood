@@ -207,7 +207,7 @@ def load_recommender():
 def display_food_card(food_item, index):
     food_emoji = FOOD_EMOJIS.get(food_item['food_type'], '🍽️')
     combined_score = food_item.get('combined_score', 'N/A')
-    score_html = f'<div class="food-score">⭐ Match Score: {combined_score}</div>'
+    score_html = f'<div class="food-score">⭐ Match Score: {combined_score:.2f}</div>'
     
     card_html = f"""
     <div class="food-card">
